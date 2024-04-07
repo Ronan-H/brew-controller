@@ -5,7 +5,26 @@ import config
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
-def get_vessel_temp()
+target_temp = 20
+temp_threshold = 0.3
+
+max_temp = target_temp + temp_threshold
+min_temp = target_temp - temp_threshold
+
+mock_vessel_temp = 18
+mock_change = 0.1
+
+def get_vessel_temp(heat_on):
+    global mock_vessel_temp
+
+    cur = mock_vessel_temp
+
+    if heat_on:
+        mock_vessel_temp += mock_change
+    else:
+        mock_vessel_temp -= mock_change
+
+    return cur
 
 async def main():
     # Asia-Pacific: "iotx-ap.meross.com"
@@ -32,14 +51,36 @@ async def main():
         # The first time we play with a device, we must update its status
         await dev.async_update()
 
-        # We can now start playing with that
-        print(f"Turning on {dev.name}...")
-        await dev.async_turn_on(channel=0)
-        print("Waiting a bit before turing it off")
-        await asyncio.sleep(3)
-        print(f"Turing off {dev.name}")
-        await dev.async_turn_off(channel=0)
+        while True:
+            vessel_temp = get_vessel_temp(dev.is_on())
 
+            print('Current vessel temp:', vessel_temp, flush=True)
+            print('  Heater is on:', dev.is_on())
+
+            if vessel_temp > max_temp:
+                if dev.is_on():
+                    print('Too hot - turning heater off')
+                    await dev.async_turn_off(channel=0)
+            elif vessel_temp < min_temp:
+                if not dev.is_on():
+                    print('Too cold - turning heater on')
+                    await dev.async_turn_on(channel=0)
+            else:
+                print('No action.')
+            
+            await asyncio.sleep(1)
+
+        # print('Device is on:', dev.is_on())
+
+        # We can now start playing with that
+        # print(f"Turning on {dev.name}...")
+        # await dev.async_turn_on(channel=0)
+        # print("Waiting a bit before turing it off")
+        # await asyncio.sleep(3)
+        # print(f"Turing off {dev.name}")
+        # await dev.async_turn_off(channel=0)
+
+    print('Exiting...')
     # Close the manager and logout from http_api
     manager.close()
     await http_api_client.async_logout()
