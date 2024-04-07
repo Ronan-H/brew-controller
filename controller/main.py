@@ -5,7 +5,7 @@ import config
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
-
+def get_vessel_temp()
 
 async def main():
     # Asia-Pacific: "iotx-ap.meross.com"
@@ -27,7 +27,6 @@ async def main():
         print("No mss210n plugs found...")
     else:
         # Turn it on channel 0
-        # Note that channel argument is optional for mss210n as they only have one channel
         dev = plugs[0]
 
         # The first time we play with a device, we must update its status
