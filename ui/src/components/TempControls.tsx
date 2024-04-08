@@ -1,4 +1,6 @@
 import { Button, VStack, Text, Badge, SimpleGrid, Flex, Heading, Divider, NumberInput, NumberInputField, NumberInputStepper, NumberDecrementStepper, NumberIncrementStepper, Stat, StatHelpText, StatLabel, StatNumber } from "@chakra-ui/react";
+import { LabelledBadge } from "./LabelledBadge";
+import { LabelledField } from "./LabelledField";
 
 export default function TempControls() {
     return (
@@ -10,24 +12,9 @@ export default function TempControls() {
                 Status
             </Heading>
 
-            <SimpleGrid spacingY='2' gridTemplateColumns='repeat(2, minmax(0, auto))'>
-                <Text fontSize="xl" fontWeight='bold' mr='2'>
-                    Heater is:
-                </Text>
-                <Flex alignItems='center' justifyContent='center'>
-                    <Badge variant='solid' colorScheme='blue' fontSize="xl">
-                        ON
-                    </Badge>
-                </Flex>
-
-                <Text fontSize="xl" fontWeight='bold' mr='2'>
-                    Current room temp:
-                </Text>
-                <Flex alignItems='center' justifyContent='center'>
-                    <Badge variant='solid' colorScheme='green' fontSize="xl">
-                        16°C
-                    </Badge>
-                </Flex>
+            <SimpleGrid spacingY='3' gridTemplateColumns='repeat(2, minmax(0, auto))'>
+                <LabelledBadge label='Heater is:' badgeText='ON' />
+                <LabelledBadge label='Current room temp:' badgeText='16°C' />
             </SimpleGrid>
 
             <Divider />
@@ -37,23 +24,18 @@ export default function TempControls() {
             </Heading>
 
             <SimpleGrid spacingY='2' gridTemplateColumns='repeat(2, minmax(0, auto))'>
-                <Flex alignItems='center'>
-                    <Text fontSize="xl" fontWeight='bold' mr='2'>
-                        Target vessel temp:
-                    </Text>
-                </Flex>
-                <Flex alignItems='center' justifyContent='center' direction='column'>
-                <NumberInput defaultValue={20} precision={1} step={0.5} min={0} max={30} isRequired>
+                <LabelledField label='Target vessel temp:' field={
+                    <NumberInput defaultValue={20} precision={1} step={0.5} min={0} max={30} isRequired>
                     <NumberInputField />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />
                         </NumberInputStepper>
                     </NumberInput>
-                </Flex>
+                } />
             </SimpleGrid>
 
-            <Button colorScheme='blue'>Submit</Button>
+            <Button colorScheme='cyan'>Submit</Button>
         </VStack>
     );
 }
