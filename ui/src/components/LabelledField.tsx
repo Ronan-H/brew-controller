@@ -8,7 +8,7 @@ type LabelledFieldProps = {
 export function LabelledField(props: LabelledFieldProps) {
     return (
         <>
-            <Text fontSize="xl" fontWeight='bold' mr='3'>
+            <Text fontSize="xl" mr='3'>
                 {props.label}
             </Text>
             <Flex alignItems='center' justifyContent='center'>
