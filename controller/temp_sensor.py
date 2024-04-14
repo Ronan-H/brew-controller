@@ -23,7 +23,7 @@ class MockTempSensor(ABC):
 
 class RealTempSensor(ABC):
   def get_temp(self):
-        # TODO: implement
+        # TODO: implement with the real hardware
         pass
 
 MockTempSensor.register(TempSensor)

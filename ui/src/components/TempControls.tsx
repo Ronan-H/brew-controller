@@ -43,6 +43,7 @@ export default function TempControls() {
             fetch(statusEndpoint).then((res) =>
                 res.json(),
             ),
+            refetchInterval: 500
     });
 
     const putTarget = useMutation({
@@ -70,6 +71,9 @@ export default function TempControls() {
         return <p>Error: {String(getStatus.error || putTarget.error)}</p>;
     }
 
+    // const targetDelta = getStatus.data.vessel_temp - getStatus.data.target_vessel_temp;
+    // const targetDeltaStr = `${targetDelta >= 0 ? '+' : ''}${targetDelta.toFixed(1)}°C`
+
     return (
         <VStack spacing={8} m='8'>
             <Heading>Brew Controller</Heading>
@@ -80,8 +84,9 @@ export default function TempControls() {
             </Heading>
 
             <SimpleGrid spacingY='3' gridTemplateColumns='repeat(2, minmax(0, auto))'>
+                <LabelledBadge label='Vessel temp:' badgeText={`${getStatus.data.vessel_temp.toFixed(3)}°C`} />
+                <LabelledBadge label='Room temp:' badgeText={`${getStatus.data.room_temp.toFixed(3)}°C`} />
                 <LabelledBadge label='Heater is:' badgeText={getStatus.data.heater_on ? 'ON' : 'OFF'} />
-                <LabelledBadge label='Current room temp:' badgeText={`${getStatus.data.room_temp.toFixed(1)}°C`} />
             </SimpleGrid>
 
             <Divider />

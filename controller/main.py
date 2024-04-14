@@ -1,75 +1,83 @@
 import asyncio
+import atexit
 import os
-import config
+import signal
+from quart import Quart, jsonify, request
+from quart_cors import cors
 
-from meross_iot.http_api import MerossHttpClient
-from meross_iot.manager import MerossManager
+from brew_controller import BrewController
 
-from temp_sensor import MockTempSensor
+# Run command: python main.py
 
-target_temp = 20
-temp_threshold = 0.3
+app = Quart(__name__)
+cors(app)
 
-max_temp = target_temp + temp_threshold
-min_temp = target_temp - temp_threshold
+INITIAL_TARGET_TEMP = 19
+INITIAL_THRESHOLD = 0.1
+UPDATE_INTERVAL_SEC = 3
 
-temp_sensor = MockTempSensor(19, 0.1)
+brew_controller = BrewController(INITIAL_TARGET_TEMP, INITIAL_THRESHOLD)
 
-async def main():
-    # Asia-Pacific: "iotx-ap.meross.com"
-    # Europe: "iotx-eu.meross.com"
-    # US: "iotx-us.meross.com"
-    http_api_client = await MerossHttpClient.async_from_user_password(api_base_url='https://iotx-eu.meross.com',
-                                                                      email=config.MEROSS_EMAIL, 
-                                                                      password=config.MEROSS_PASSWORD)
+exiting = False
 
-    # Setup and start the device manager
-    manager = MerossManager(http_client=http_api_client)
-    await manager.async_init()
+def init_app():
 
-    # Retrieve all the mss210n devices that are registered on this account
-    await manager.async_device_discovery()
-    plugs = manager.find_devices(device_type="mss210n")
+    @app.route("/status")
+    async def status():
+        return jsonify(
+            heater_on=brew_controller.is_heater_on(),
+            vessel_temp=brew_controller.get_vessel_temp(),
+            room_temp=brew_controller.get_room_temp(),
+            target_vessel_temp=brew_controller.target_temp,
+            vessel_temp_threshold=brew_controller.temp_threshold,
+        )
 
-    if len(plugs) < 1:
-        print("No mss210n plugs found...")
-    else:
-        # Turn it on channel 0
-        dev = plugs[0]
+    @app.route("/target", methods=["PUT"])
+    async def target():
+        request_json = await request.json
 
-        # The first time we play with a device, we must update its status
-        await dev.async_update()
+        if 'target_vessel_temp' in request_json:
+            brew_controller.target_temp = float(request_json['target_vessel_temp'])
 
-        while True:
-            vessel_temp = temp_sensor.get_temp(dev.is_on())
+        if 'vessel_temp_threshold' in request_json:
+            brew_controller.temp_threshold = float(request_json['vessel_temp_threshold'])
 
-            print('Current vessel temp:', vessel_temp, flush=True)
-            print('  Heater is on:', dev.is_on())
+        return await status()
 
-            if vessel_temp > max_temp:
-                if dev.is_on():
-                    print('Too hot - turning heater off')
-                    await dev.async_turn_off(channel=0)
-            elif vessel_temp < min_temp:
-                if not dev.is_on():
-                    print('Too cold - turning heater on')
-                    await dev.async_turn_on(channel=0)
-            else:
-                print('No action.')
-            
-            await asyncio.sleep(1)
+init_app()
 
-    print('Exiting...')
-    # Close the manager and logout from http_api
-    manager.close()
-    await http_api_client.async_logout()
+# async def run_api_service():
+#     await app.run_task(host='0.0.0.0', port=5000)
 
+
+async def run_controller_loop():
+    while not exiting:
+        await brew_controller.update()
+        await asyncio.sleep(UPDATE_INTERVAL_SEC)
+
+
+async def run_app_async():
+    await brew_controller.init_meross_plug()
+
+    await asyncio.gather(app.run_task(host='0.0.0.0', port=5000), run_controller_loop())
+    # await run_controller_loop()
+    # app.run_task(host='0.0.0.0', port=5000)
+    # await run_controller_loop()
+    
+
+# TODO: Get cleanup on exit working properly
+# @atexit.register
+def shutdown(signal, frame):
+    global exiting
+
+    print('Shutting down...')
+    exiting = True
+    # asyncio.run(brew_controller.cleanup_fn())
+
+signal.signal(signal.SIGINT, shutdown)
 
 if __name__ == '__main__':
-    # Windows and python 3.8 requires to set up a specific event_loop_policy.
-    #  On Linux and MacOSX this is not necessary.
     if os.name == 'nt':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.stop()
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(run_app_async())

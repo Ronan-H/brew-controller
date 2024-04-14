@@ -4,11 +4,12 @@ import { LabelledField } from "./LabelledField";
 type LabelledBadgeProps = {
     label: JSX.Element | string,
     badgeText: string,
+    colorScheme?: string,
 }
 
 export function LabelledBadge(props: LabelledBadgeProps) {
     const badge = (
-        <Badge variant='outline' colorScheme='cyan' fontSize="xl">
+        <Badge variant='outline' colorScheme={props.colorScheme ?? 'cyan'} fontSize="xl">
             {props.badgeText}
         </Badge>
     );

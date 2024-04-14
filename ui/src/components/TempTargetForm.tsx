@@ -2,19 +2,14 @@ import {
     Button,
     VStack,
     SimpleGrid,
-    Heading,
-    Divider,
     NumberInput,
     NumberInputField,
     NumberInputStepper,
     NumberDecrementStepper,
     NumberIncrementStepper,
 } from "@chakra-ui/react";
-import { LabelledBadge } from "./LabelledBadge";
 import { LabelledField } from "./LabelledField";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Spinner } from '@chakra-ui/react'
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { PutTargetPayloadType } from "./TempControls";
 
 type TempTargetFormProps = {
