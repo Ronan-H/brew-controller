@@ -5,26 +5,15 @@ import config
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
+from temp_sensor import MockTempSensor
+
 target_temp = 20
 temp_threshold = 0.3
 
 max_temp = target_temp + temp_threshold
 min_temp = target_temp - temp_threshold
 
-mock_vessel_temp = 18
-mock_change = 0.1
-
-def get_vessel_temp(heat_on):
-    global mock_vessel_temp
-
-    cur = mock_vessel_temp
-
-    if heat_on:
-        mock_vessel_temp += mock_change
-    else:
-        mock_vessel_temp -= mock_change
-
-    return cur
+temp_sensor = MockTempSensor(19, 0.1)
 
 async def main():
     # Asia-Pacific: "iotx-ap.meross.com"
@@ -52,7 +41,7 @@ async def main():
         await dev.async_update()
 
         while True:
-            vessel_temp = get_vessel_temp(dev.is_on())
+            vessel_temp = temp_sensor.get_temp(dev.is_on())
 
             print('Current vessel temp:', vessel_temp, flush=True)
             print('  Heater is on:', dev.is_on())
@@ -69,16 +58,6 @@ async def main():
                 print('No action.')
             
             await asyncio.sleep(1)
-
-        # print('Device is on:', dev.is_on())
-
-        # We can now start playing with that
-        # print(f"Turning on {dev.name}...")
-        # await dev.async_turn_on(channel=0)
-        # print("Waiting a bit before turing it off")
-        # await asyncio.sleep(3)
-        # print(f"Turing off {dev.name}")
-        # await dev.async_turn_off(channel=0)
 
     print('Exiting...')
     # Close the manager and logout from http_api
