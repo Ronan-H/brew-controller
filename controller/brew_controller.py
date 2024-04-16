@@ -16,6 +16,16 @@ class BrewController:
         self.heater_plug = None
         self.cleanup_fn = None
     
+    @staticmethod
+    def init_from_file(file_path):
+        with open(file_path) as f:
+            fields = (float(n) for n in f.readline().split(','))
+            return BrewController(*fields)
+        
+    def write_settings_to_file(self, file_path):
+        with open(file_path, 'w') as f:
+            f.write(f'{self.target_temp},{self.temp_threshold}\n')
+
     def is_heater_on(self):
         return self.heater_plug.is_on()
     

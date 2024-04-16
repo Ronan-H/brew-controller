@@ -9,6 +9,7 @@ import {
     NumberInputStepper,
     NumberDecrementStepper,
     NumberIncrementStepper,
+    useToast,
 } from "@chakra-ui/react";
 import { LabelledBadge } from "./LabelledBadge";
 import { LabelledField } from "./LabelledField";
@@ -36,6 +37,7 @@ const targetEndpoint = host + '/target';
 
 export default function TempControls() {
     const queryClient = useQueryClient();
+    const toast = useToast();
 
     const getStatus = useQuery({
         queryKey: ['tempStatus'],
@@ -43,7 +45,7 @@ export default function TempControls() {
             fetch(statusEndpoint).then((res) =>
                 res.json(),
             ),
-            refetchInterval: 500
+            // refetchInterval: 3000
     });
 
     const putTarget = useMutation({
@@ -58,15 +60,20 @@ export default function TempControls() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['tempStatus']});
+
+            toast({
+                title: 'Target updated successfully',
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+                colorScheme: 'blue',
+                position: 'bottom',
+            })
         },
     });
 
     const onSubmit: SubmitHandler<PutTargetPayloadType> = (data) => putTarget.mutate(data);
     
-    if (getStatus.isPending || putTarget.isPending) {
-        return <Spinner />;
-    }
-
     if (getStatus.error || putTarget.error) {
         return <p>Error: {String(getStatus.error || putTarget.error)}</p>;
     }
@@ -83,11 +90,21 @@ export default function TempControls() {
                 Status
             </Heading>
 
-            <SimpleGrid spacingY='3' gridTemplateColumns='repeat(2, minmax(0, auto))'>
-                <LabelledBadge label='Vessel temp:' badgeText={`${getStatus.data.vessel_temp.toFixed(3)}°C`} />
-                <LabelledBadge label='Room temp:' badgeText={`${getStatus.data.room_temp.toFixed(3)}°C`} />
-                <LabelledBadge label='Heater is:' badgeText={getStatus.data.heater_on ? 'ON' : 'OFF'} />
-            </SimpleGrid>
+            {!getStatus.isPending ? <>
+                <SimpleGrid spacingY='3' gridTemplateColumns='repeat(2, minmax(0, auto))'>
+                    <LabelledBadge
+                        label='Vessel temp:'
+                        badgeText={`${getStatus.data.vessel_temp.toFixed(3)}°C`}
+                        colorScheme={Math.abs(getStatus.data?.vessel_temp - getStatus.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
+                    />
+                    <LabelledBadge
+                        label='Room temp:'
+                        badgeText={`${getStatus.data.room_temp.toFixed(3)}°C`}
+                        colorScheme={getStatus.data?.room_temp < getStatus.data?.target_vessel_temp ? 'green' : 'red'}
+                    />
+                    <LabelledBadge label='Heater is:' badgeText={getStatus.data.heater_on ? 'ON' : 'OFF'} />
+                </SimpleGrid>
+            </> : <Spinner size='lg' color='blue.500' thickness='4px' />}
 
             <Divider />
 
@@ -95,7 +112,13 @@ export default function TempControls() {
                 Settings
             </Heading>
 
-            <TempTargetForm key={`temp-target-form-${getStatus.dataUpdatedAt}`} targetData={getStatus.data} onSubmit={onSubmit} />
+            {!(getStatus.isPending || putTarget.isPending) ? <>
+                <TempTargetForm
+                    key={`temp-target-form-${getStatus.dataUpdatedAt}`}
+                    targetData={getStatus.data}
+                    onSubmit={onSubmit}
+                />
+            </> : <Spinner size='lg' color='blue.500' thickness='4px' />}
         </VStack>
     );
 }
