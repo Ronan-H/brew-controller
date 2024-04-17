@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {
@@ -9,7 +8,6 @@ import {
   theme as chakraTheme,
   ThemeConfig,
 } from '@chakra-ui/react'
-import TempControls from './components/TempControls'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient()

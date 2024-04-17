@@ -72,7 +72,7 @@ export default function TempControls() {
     }
 
     return (
-        <VStack spacing={8} m='8'>
+        <VStack spacing='5' m='5'>
             <Heading>Brew Controller</Heading>
             <Divider />
             
