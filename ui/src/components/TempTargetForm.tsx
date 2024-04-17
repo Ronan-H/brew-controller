@@ -19,10 +19,8 @@ type TempTargetFormProps = {
 
 export default function TempTargetForm(props: TempTargetFormProps) {
     const {
-        register,
         handleSubmit,
-        watch,
-        formState: { errors },
+        formState: { isDirty },
         control,
       } = useForm<PutTargetPayloadType>({
         defaultValues: props.targetData,
@@ -71,7 +69,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                     } />
                 </SimpleGrid>
 
-                <Button colorScheme='cyan' type='submit'>Submit</Button>
+                <Button colorScheme='cyan' type='submit' isDisabled={!isDirty}>Submit</Button>
             </VStack>
         </form>
     );

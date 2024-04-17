@@ -1,5 +1,4 @@
 import asyncio
-import atexit
 import os
 import signal
 from quart import Quart, jsonify, request
@@ -55,9 +54,6 @@ def init_app():
 
 init_app()
 
-# async def run_api_service():
-#     await app.run_task(host='0.0.0.0', port=5000)
-
 
 async def run_controller_loop():
     while not exiting:
@@ -69,9 +65,6 @@ async def run_app_async():
     await brew_controller.init_meross_plug()
 
     await asyncio.gather(app.run_task(host='0.0.0.0', port=5000), run_controller_loop())
-    # await run_controller_loop()
-    # app.run_task(host='0.0.0.0', port=5000)
-    # await run_controller_loop()
     
 
 # TODO: Get cleanup on exit working properly
