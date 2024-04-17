@@ -73,27 +73,29 @@ export default function TempControls() {
 
     return (
         <VStack spacing='5' m='5'>
-            <Heading>Brew Controller</Heading>
+            <Heading as='h2'>Brew Controller</Heading>
             <Divider />
             
             <Heading as='h3' size='lg'>
                 Status
             </Heading>
 
+            <Divider />
+
             {!getStatus.isPending ? <>
-                <SimpleGrid spacingY='3' gridTemplateColumns='repeat(2, minmax(0, auto))'>
+                <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
                     <LabelledBadge
-                        label='Vessel temp:'
-                        badgeText={`${getStatus.data.vessel_temp.toFixed(2)}°C`}
+                        label='Vessel'
+                        badgeText={`${getStatus.data.vessel_temp.toFixed(1)}°C`}
                         colorScheme={Math.abs(getStatus.data?.vessel_temp - getStatus.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
                     />
                     <LabelledBadge
-                        label='Room temp:'
-                        badgeText={`${getStatus.data.room_temp.toFixed(2)}°C`}
+                        label='Room'
+                        badgeText={`${getStatus.data.room_temp.toFixed(1)}°C`}
                         colorScheme={getStatus.data?.room_temp < getStatus.data?.target_vessel_temp ? 'green' : 'red'}
                     />
                     <LabelledBadge
-                        label='Heater is:'
+                        label='Heater'
                         badgeText={getStatus.data.heater_on ? 'ON' : 'OFF'}
                         colorScheme={getStatus.data.heater_on ? 'cyan' : 'gray'}
                     />
@@ -105,6 +107,8 @@ export default function TempControls() {
             <Heading as='h3' size='lg'>
                 Settings
             </Heading>
+
+            <Divider />
 
             {!(getStatus.isPending || putTarget.isPending) ? <>
                 <TempTargetForm

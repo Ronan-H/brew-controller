@@ -9,7 +9,15 @@ type LabelledBadgeProps = {
 
 export function LabelledBadge(props: LabelledBadgeProps) {
     const badge = (
-        <Badge variant='outline' colorScheme={props.colorScheme ?? 'cyan'} fontSize="xl">
+        <Badge
+            variant='outline'
+            colorScheme={props.colorScheme ?? 'cyan'}
+            fontSize="2xl"
+            pl='6px'
+            pr='6px'
+            width={'100%'}
+            textAlign={'center'}
+        >
             {props.badgeText}
         </Badge>
     );

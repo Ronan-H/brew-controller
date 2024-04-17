@@ -30,7 +30,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
         <form onSubmit={handleSubmit(props.onSubmit)}>
             <VStack spacing={8}>
                 <SimpleGrid spacingY='2' gridTemplateColumns='repeat(2, minmax(0, auto))'>
-                    <LabelledField label='Target vessel temp:' field={
+                    <LabelledField label='Vessel Target (°C)' field={
                         <Controller
                             name={'target_vessel_temp'}
                             control={control}
@@ -38,8 +38,8 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                                 required: true,
                             }}
                             render={({ field: { ref, ...restField } }) => (
-                                <NumberInput {...restField} precision={1} step={0.5} min={0} max={30} isRequired>
-                                <NumberInputField ref={ref} name={restField.name} />
+                                <NumberInput {...restField} size='lg' w={'90px'} precision={1} step={0.5} min={0} max={30} isRequired>
+                                    <NumberInputField ref={ref} name={restField.name} />
                                     <NumberInputStepper>
                                         <NumberIncrementStepper />
                                         <NumberDecrementStepper />
@@ -49,7 +49,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                         />
                     } />
 
-                    <LabelledField label='Heater threshold:' field={
+                    <LabelledField label='Target Threshold (°C)' field={
                         <Controller
                             name={'vessel_temp_threshold'}
                             control={control}
@@ -57,8 +57,8 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                                 required: true,
                             }}
                             render={({ field: { ref, ...restField } }) => (
-                                <NumberInput {...restField} precision={1} step={0.1} min={0} max={3} isRequired>
-                                <NumberInputField ref={ref} name={restField.name} />
+                                <NumberInput {...restField} size='lg' w={'90px'} precision={1} step={0.1} min={0} max={3} isRequired>
+                                    <NumberInputField ref={ref} name={restField.name} />
                                     <NumberInputStepper>
                                         <NumberIncrementStepper />
                                         <NumberDecrementStepper />
