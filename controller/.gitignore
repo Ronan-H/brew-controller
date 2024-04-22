@@ -2,3 +2,4 @@
 /config.py
 __pycache__/
 /controller-settings.dat
+.venv/

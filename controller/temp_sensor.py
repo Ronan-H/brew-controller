@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from os import path
 
 class TempSensor:
 
@@ -20,11 +21,24 @@ class MockTempSensor(ABC):
 
         return self.last_reading
   
+sensor_base_path = '/sys/bus/w1/devices/'
+sensor_file_name = 'w1_slave'
 
 class RealTempSensor(ABC):
-  def get_temp(self):
-        # TODO: implement with the real hardware
-        pass
+    def __init__(self, sensor_id):
+        self.sensor_id = sensor_id
+
+    def get_temp(self, _heater_on):
+        sensor_file_path = path.join(sensor_base_path, self.sensor_id, sensor_file_name)
+
+        with open(sensor_file_path) as f:
+            lines = f.readlines()
+            assert len(lines) == 2
+
+            temp_str = lines[1].split('t=')[1] # something like 12345 (= 12.345 degrees)
+            temp_float = float(f'{temp_str[:2]}.{temp_str[2:]}')
+
+            return temp_float
 
 MockTempSensor.register(TempSensor)
 RealTempSensor.register(TempSensor)

@@ -24,7 +24,7 @@ export type PutTargetPayloadType = {
     vessel_temp_threshold: number,
 }
 
-const host = 'http://localhost:5000';
+const host = 'http://pi.local:5000';
 const statusEndpoint = host + '/status';
 const targetEndpoint = host + '/target';
 

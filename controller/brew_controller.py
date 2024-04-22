@@ -3,7 +3,7 @@ import config
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
-from temp_sensor import MockTempSensor
+from temp_sensor import MockTempSensor, RealTempSensor
 
 
 class BrewController:
@@ -11,8 +11,11 @@ class BrewController:
         self.target_temp = target_temp
         self.temp_threshold = temp_threshold
 
-        self.vessel_sensor = MockTempSensor(target_temp - temp_threshold * 2, temp_threshold / 4)
-        self.room_sensor = MockTempSensor(target_temp - 3, 0)
+        # self.vessel_sensor = MockTempSensor(target_temp - temp_threshold * 2, temp_threshold / 4)
+        # self.room_sensor = MockTempSensor(target_temp - 3, 0)
+        self.vessel_sensor = RealTempSensor('28-d7f9691f64ff') # no tape
+        self.room_sensor = RealTempSensor('28-2acb691f64ff') # red tape
+        
         self.heater_plug = None
         self.cleanup_fn = None
     

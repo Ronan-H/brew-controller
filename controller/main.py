@@ -13,7 +13,7 @@ cors(app)
 
 INITIAL_TARGET_TEMP = 19
 INITIAL_THRESHOLD = 0.1
-UPDATE_INTERVAL_SEC = 3
+UPDATE_INTERVAL_SEC = 30
 SERIALIZED_BC_PATH = './controller-settings.dat'
 
 brew_controller = None
