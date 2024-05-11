@@ -49,6 +49,25 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                         />
                     } />
 
+                    <LabelledField label='Vessel Offset (°C)' field={
+                        <Controller
+                            name={'vessel_temp_offset'}
+                            control={control}
+                            rules={{
+                                required: true,
+                            }}
+                            render={({ field: { ref, ...restField } }) => (
+                                <NumberInput {...restField} size='lg' w={'90px'} precision={2} step={0.01} min={-10} max={10} isRequired>
+                                    <NumberInputField ref={ref} name={restField.name} pattern="(-)?[0-9]*(.[0-9]+)?" />
+                                    <NumberInputStepper>
+                                        <NumberIncrementStepper />
+                                        <NumberDecrementStepper />
+                                    </NumberInputStepper>
+                                </NumberInput>
+                            )}
+                        />
+                    } />
+
                     <LabelledField label='Target Threshold (°C)' field={
                         <Controller
                             name={'vessel_temp_threshold'}
@@ -57,8 +76,8 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                                 required: true,
                             }}
                             render={({ field: { ref, ...restField } }) => (
-                                <NumberInput {...restField} size='lg' w={'90px'} precision={2} step={0.1} min={0} max={3} isRequired>
-                                    <NumberInputField ref={ref} name={restField.name} />
+                                <NumberInput {...restField} size='lg' w={'90px'} precision={2} step={0.1} min={-3} max={+3} isRequired>
+                                    <NumberInputField ref={ref} name={restField.name} pattern="(-)?[0-9]*(.[0-9]+)?" />
                                     <NumberInputStepper>
                                         <NumberIncrementStepper />
                                         <NumberDecrementStepper />

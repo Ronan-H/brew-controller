@@ -6,7 +6,8 @@ INITIAL_LAST_READING = 18
 
 class TempSensor(ABC):
 
-    def __init__(self):
+    def __init__(self, offset):
+        self.offset = offset
         self.last_reading = INITIAL_LAST_READING
 
     @abstractmethod
@@ -28,25 +29,26 @@ class TempSensor(ABC):
 
 
 class MockTempSensor(TempSensor):
-  def __init__(self, initial_reading, delta):
-      super().__init__()
-      self.last_reading = initial_reading
+  def __init__(self, offset, initial_reading, delta):
+      super().__init__(offset)
+      self.mock_reading = initial_reading
+
       self.delta = delta
 
   def get_temp(self, heater_on):
         if heater_on:
-            self.last_reading += self.delta
+            self.mock_reading += self.delta
         else:
-            self.last_reading -= self.delta
+            self.mock_reading -= self.delta
 
-        return self.last_reading
+        return self.mock_reading + self.offset
   
 sensor_base_path = '/sys/bus/w1/devices/'
 sensor_file_name = 'temperature'
 
 class RealTempSensor(TempSensor):
-    def __init__(self, sensor_id):
-        super().__init__()
+    def __init__(self, offset, sensor_id):
+        super().__init__(offset)
         self.sensor_id = sensor_id
 
     def get_temp(self, _heater_on):
@@ -57,7 +59,7 @@ class RealTempSensor(TempSensor):
 
             temp_float = float(f'{temp_str[:2]}.{temp_str[2:]}')
 
-            return temp_float
+            return temp_float + self.offset
 
 # MockTempSensor.register(TempSensor)
 # RealTempSensor.register(TempSensor)

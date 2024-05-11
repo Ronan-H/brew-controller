@@ -7,14 +7,15 @@ from temp_sensor import MockTempSensor, RealTempSensor
 
 
 class BrewController:
-    def __init__(self, target_temp, temp_threshold):
+    def __init__(self, target_temp, temp_threshold, vessel_offset):
         self.target_temp = target_temp
         self.temp_threshold = temp_threshold
+        self.vessel_offset = vessel_offset
 
-        # self.vessel_sensor = MockTempSensor(target_temp - temp_threshold * 2, temp_threshold / 4)
-        # self.room_sensor = MockTempSensor(target_temp - 3, 0)
-        self.vessel_sensor = RealTempSensor('28-b5fa691f64ff') # no tape
-        self.room_sensor = RealTempSensor('28-2acb691f64ff') # red tape
+        # self.vessel_sensor = MockTempSensor(vessel_offset, target_temp - 2, 0.25)
+        # self.room_sensor = MockTempSensor(0, target_temp - 3, 0)
+        self.vessel_sensor = RealTempSensor(vessel_offset, '28-b5fa691f64ff') # no tape
+        self.room_sensor = RealTempSensor(0, '28-2acb691f64ff') # red tape
         
         self.heater_plug = None
         self.cleanup_fn = None
@@ -27,7 +28,7 @@ class BrewController:
         
     def write_settings_to_file(self, file_path):
         with open(file_path, 'w') as f:
-            f.write(f'{self.target_temp},{self.temp_threshold}\n')
+            f.write(f'{self.target_temp},{self.temp_threshold},{self.get_vessel_offset()}\n')
 
     def is_heater_on(self):
         return self.heater_plug.is_on()
@@ -43,6 +44,12 @@ class BrewController:
     
     def query_room_temp(self):
         return self.room_sensor.last_reading
+
+    def get_vessel_offset(self):
+        return self.vessel_sensor.offset
+    
+    def set_vessel_offset(self, offset):
+        self.vessel_sensor.offset = offset
 
     async def init_meross_plug(self):
         # Asia-Pacific: "iotx-ap.meross.com"
@@ -92,11 +99,13 @@ class BrewController:
         print('Current vessel temp:', vessel_temp, flush=True)
         print('  Heater is on? - ', is_heater_on)
 
-        if vessel_temp >= max_temp and is_heater_on:
-            print('  Turning heater off')
-            await self.heater_plug.async_turn_off(channel=0)
-        elif vessel_temp <= min_temp and not is_heater_on:
-            print('  Turning heater on')
-            await self.heater_plug.async_turn_on(channel=0)
+        if vessel_temp > max_temp:
+            if is_heater_on:
+                print('  Turning heater off')
+                await self.heater_plug.async_turn_off(channel=0)
+        elif vessel_temp < min_temp:
+            if not is_heater_on:
+                print('  Turning heater on')
+                await self.heater_plug.async_turn_on(channel=0)
         else:
             print('  No action.')
