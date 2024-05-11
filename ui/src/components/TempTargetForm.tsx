@@ -57,7 +57,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                                 required: true,
                             }}
                             render={({ field: { ref, ...restField } }) => (
-                                <NumberInput {...restField} size='lg' w={'90px'} precision={1} step={0.1} min={0} max={3} isRequired>
+                                <NumberInput {...restField} size='lg' w={'90px'} precision={2} step={0.1} min={0} max={3} isRequired>
                                     <NumberInputField ref={ref} name={restField.name} />
                                     <NumberInputStepper>
                                         <NumberIncrementStepper />

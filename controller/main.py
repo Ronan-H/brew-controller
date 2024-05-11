@@ -28,12 +28,16 @@ exiting = False
 
 def init_app():
 
+    @app.route("/test")
+    async def test():
+        return 'TEST'
+
     @app.route("/status")
     async def status():
         return jsonify(
             heater_on=brew_controller.is_heater_on(),
-            vessel_temp=brew_controller.get_vessel_temp(),
-            room_temp=brew_controller.get_room_temp(),
+            vessel_temp=brew_controller.query_vessel_temp(),
+            room_temp=brew_controller.query_room_temp(),
             target_vessel_temp=brew_controller.target_temp,
             vessel_temp_threshold=brew_controller.temp_threshold,
         )

@@ -13,7 +13,7 @@ class BrewController:
 
         # self.vessel_sensor = MockTempSensor(target_temp - temp_threshold * 2, temp_threshold / 4)
         # self.room_sensor = MockTempSensor(target_temp - 3, 0)
-        self.vessel_sensor = RealTempSensor('28-d7f9691f64ff') # no tape
+        self.vessel_sensor = RealTempSensor('28-b5fa691f64ff') # no tape
         self.room_sensor = RealTempSensor('28-2acb691f64ff') # red tape
         
         self.heater_plug = None
@@ -33,10 +33,16 @@ class BrewController:
         return self.heater_plug.is_on()
     
     def get_vessel_temp(self):
-        return self.vessel_sensor.get_temp(self.is_heater_on())
+        return self.vessel_sensor.get_temp_with_retry(self.is_heater_on(), 3)
     
     def get_room_temp(self):
-        return self.room_sensor.get_temp(self.is_heater_on())
+        return self.room_sensor.get_temp_with_retry(self.is_heater_on(), 3)
+    
+    def query_vessel_temp(self):
+        return self.vessel_sensor.last_reading
+    
+    def query_room_temp(self):
+        return self.room_sensor.last_reading
 
     async def init_meross_plug(self):
         # Asia-Pacific: "iotx-ap.meross.com"
@@ -74,7 +80,11 @@ class BrewController:
     
     async def update(self):
         is_heater_on = self.is_heater_on()
-        vessel_temp = self.vessel_sensor.get_temp(self.is_heater_on())
+        vessel_temp = self.get_vessel_temp()
+        room_temp = self.get_room_temp()
+
+        with open('temp-history.csv', 'a') as f:
+            f.write(f'{self.target_temp},{self.temp_threshold},{is_heater_on},{vessel_temp},{room_temp}\n')
 
         max_temp = self.target_temp + self.temp_threshold
         min_temp = self.target_temp - self.temp_threshold

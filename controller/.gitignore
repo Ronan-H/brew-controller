@@ -3,3 +3,4 @@
 __pycache__/
 /controller-settings.dat
 .venv/
+temp-history*.csv

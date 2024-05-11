@@ -24,7 +24,7 @@ export type PutTargetPayloadType = {
     vessel_temp_threshold: number,
 }
 
-const host = 'http://pi.local:5000';
+const host = 'http://192.168.0.21:5000';
 const statusEndpoint = host + '/status';
 const targetEndpoint = host + '/target';
 
@@ -86,12 +86,12 @@ export default function TempControls() {
                 <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
                     <LabelledBadge
                         label='Vessel'
-                        badgeText={`${getStatus.data.vessel_temp.toFixed(1)}°C`}
+                        badgeText={`${getStatus.data.vessel_temp.toFixed(2)}°C`}
                         colorScheme={Math.abs(getStatus.data?.vessel_temp - getStatus.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Room'
-                        badgeText={`${getStatus.data.room_temp.toFixed(1)}°C`}
+                        badgeText={`${getStatus.data.room_temp.toFixed(2)}°C`}
                         colorScheme={getStatus.data?.room_temp < getStatus.data?.target_vessel_temp ? 'green' : 'red'}
                     />
                     <LabelledBadge

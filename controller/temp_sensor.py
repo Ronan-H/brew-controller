@@ -1,15 +1,35 @@
 from abc import ABC, abstractmethod
 from os import path
+import time
 
-class TempSensor:
+INITIAL_LAST_READING = 18
+
+class TempSensor(ABC):
+
+    def __init__(self):
+        self.last_reading = INITIAL_LAST_READING
 
     @abstractmethod
     def get_temp(self):
         pass
 
+    def get_temp_with_retry(self, heater_on, max_retries):
+        for i in range(max_retries):
+            try:
+                temp = self.get_temp(heater_on)
+                self.last_reading = temp
+                return temp 
+            except:
+                print(f'Failed to read temperature after {i} attempts')
+                time.sleep(1)
+        
+        print('Reached max retries to read temperature, returning previous reading of: ', self.last_reading)
+        return self.last_reading
 
-class MockTempSensor(ABC):
+
+class MockTempSensor(TempSensor):
   def __init__(self, initial_reading, delta):
+      super().__init__()
       self.last_reading = initial_reading
       self.delta = delta
 
@@ -22,23 +42,22 @@ class MockTempSensor(ABC):
         return self.last_reading
   
 sensor_base_path = '/sys/bus/w1/devices/'
-sensor_file_name = 'w1_slave'
+sensor_file_name = 'temperature'
 
-class RealTempSensor(ABC):
+class RealTempSensor(TempSensor):
     def __init__(self, sensor_id):
+        super().__init__()
         self.sensor_id = sensor_id
 
     def get_temp(self, _heater_on):
         sensor_file_path = path.join(sensor_base_path, self.sensor_id, sensor_file_name)
 
         with open(sensor_file_path) as f:
-            lines = f.readlines()
-            assert len(lines) == 2
+            temp_str = f.readline()
 
-            temp_str = lines[1].split('t=')[1] # something like 12345 (= 12.345 degrees)
             temp_float = float(f'{temp_str[:2]}.{temp_str[2:]}')
 
             return temp_float
 
-MockTempSensor.register(TempSensor)
-RealTempSensor.register(TempSensor)
+# MockTempSensor.register(TempSensor)
+# RealTempSensor.register(TempSensor)

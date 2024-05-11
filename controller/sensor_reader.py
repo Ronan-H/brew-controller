@@ -1,8 +1,9 @@
 
 from os import path
+import time
 
 # Sensors:
-# 1. /sys/bus/w1/devices/28-d7f9691f64ff - No tape, for vessel temp
+# 1. /sys/bus/w1/devices/28-b5fa691f64ff - No tape, for vessel temp
 # 1. /sys/bus/w1/devices/28-2acb691f64ff - Red tape, for room temp
 
 base_path = '/sys/bus/w1/devices/'
@@ -21,5 +22,11 @@ def read_sensor(sensor_id):
         return temp_float
 
 
-print(read_sensor('28-2acb691f64ff'))
-print(read_sensor('28-d7f9691f64ff'))
+sensors = ('28-2acb691f64ff', '28-b5fa691f64ff')
+
+while True:
+    for s in sensors:
+        try:
+            print(read_sensor(s))
+        except:
+            print('Failed on sensor:', s)
