@@ -26,7 +26,7 @@ export type PutTargetPayloadType = {
     vessel_temp_offset: number,
 }
 
-const host = 'http://192.168.0.21:5000';
+const host = 'http://192.168.0.23:5000';
 // const host = 'http://192.168.0.32:5000';
 const statusEndpoint = host + '/status';
 const targetEndpoint = host + '/target';
