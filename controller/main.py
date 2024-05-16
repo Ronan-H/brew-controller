@@ -1,6 +1,6 @@
 import asyncio
 import os
-import signal
+import serial
 from quart import Quart, jsonify, request
 from quart_cors import cors
 
@@ -14,7 +14,6 @@ cors(app)
 INITIAL_TARGET_TEMP = 19
 INITIAL_THRESHOLD = 0.1
 INITIAL_VESSEL_OFFSET = 0.0
-UPDATE_INTERVAL_SEC = 30
 SERIALIZED_BC_PATH = './controller-settings.dat'
 
 brew_controller = None
@@ -25,7 +24,6 @@ except:
     brew_controller = BrewController(INITIAL_TARGET_TEMP, INITIAL_THRESHOLD, INITIAL_VESSEL_OFFSET)
     brew_controller.write_settings_to_file(SERIALIZED_BC_PATH)
 
-exiting = False
 
 def init_app():
 
@@ -37,11 +35,11 @@ def init_app():
     async def status():
         return jsonify(
             heater_on=brew_controller.is_heater_on(),
-            vessel_temp=brew_controller.query_vessel_temp(),
-            room_temp=brew_controller.query_room_temp(),
+            vessel_temp=brew_controller.last_vessel_temp,
+            room_temp=brew_controller.last_room_temp,
             target_vessel_temp=brew_controller.target_temp,
             vessel_temp_threshold=brew_controller.temp_threshold,
-            vessel_temp_offset=brew_controller.get_vessel_offset()
+            vessel_temp_offset=brew_controller.vessel_offset
         )
 
     @app.route("/target", methods=["PUT"])
@@ -63,11 +61,26 @@ def init_app():
 
 init_app()
 
+MIN_VALID_TEMP = 1
+MAX_VALID_TEMP = 80
 
 async def run_controller_loop():
-    while not exiting:
-        await brew_controller.update()
-        await asyncio.sleep(UPDATE_INTERVAL_SEC)
+    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+    ser.reset_input_buffer()
+
+    while True:
+        if ser.in_waiting > 0:
+            line = ser.readline().decode('utf-8').rstrip()
+            temps = [float(t) for t in line.split(',')]
+
+            if len(temps) == 2 and \
+              temps[0] > MIN_VALID_TEMP and temps[0] < MAX_VALID_TEMP and \
+              temps[1] > MIN_VALID_TEMP and temps[1] < MAX_VALID_TEMP:
+                await brew_controller.update(*temps)
+            else:
+                print(f'Invalid temps: ${temps}, skipping this reading')
+        
+        await asyncio.sleep(1)
 
 
 async def run_app_async():
@@ -75,17 +88,6 @@ async def run_app_async():
 
     await asyncio.gather(app.run_task(host='0.0.0.0', port=5000), run_controller_loop())
     
-
-# TODO: Get cleanup on exit working properly
-# @atexit.register
-def shutdown(signal, frame):
-    global exiting
-
-    print('Shutting down...')
-    exiting = True
-    # asyncio.run(brew_controller.cleanup_fn())
-
-signal.signal(signal.SIGINT, shutdown)
 
 if __name__ == '__main__':
     if os.name == 'nt':

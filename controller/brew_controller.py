@@ -5,6 +5,7 @@ from meross_iot.manager import MerossManager
 
 from temp_sensor import MockTempSensor, RealTempSensor
 
+INITIAL_LAST_READING = 18
 
 class BrewController:
     def __init__(self, target_temp, temp_threshold, vessel_offset):
@@ -12,10 +13,13 @@ class BrewController:
         self.temp_threshold = temp_threshold
         self.vessel_offset = vessel_offset
 
+        self.last_vessel_temp = INITIAL_LAST_READING
+        self.last_room_temp = INITIAL_LAST_READING
+
         # self.vessel_sensor = MockTempSensor(vessel_offset, target_temp - 2, 0.25)
         # self.room_sensor = MockTempSensor(0, target_temp - 3, 0)
-        self.vessel_sensor = RealTempSensor(vessel_offset, '28-b5fa691f64ff') # no tape
-        self.room_sensor = RealTempSensor(0, '28-2acb691f64ff') # red tape
+        # self.vessel_sensor = RealTempSensor(vessel_offset, '28-b5fa691f64ff') # no tape
+        # self.room_sensor = RealTempSensor(0, '28-2acb691f64ff') # red tape
         
         self.heater_plug = None
         self.cleanup_fn = None
@@ -28,25 +32,10 @@ class BrewController:
         
     def write_settings_to_file(self, file_path):
         with open(file_path, 'w') as f:
-            f.write(f'{self.target_temp},{self.temp_threshold},{self.get_vessel_offset()}\n')
+            f.write(f'{self.target_temp},{self.temp_threshold},{self.vessel_offset}\n')
 
     def is_heater_on(self):
         return self.heater_plug.is_on()
-    
-    def get_vessel_temp(self):
-        return self.vessel_sensor.get_temp_with_retry(self.is_heater_on(), 3)
-    
-    def get_room_temp(self):
-        return self.room_sensor.get_temp_with_retry(self.is_heater_on(), 3)
-    
-    def query_vessel_temp(self):
-        return self.vessel_sensor.last_reading
-    
-    def query_room_temp(self):
-        return self.room_sensor.last_reading
-
-    def get_vessel_offset(self):
-        return self.vessel_sensor.offset
     
     def set_vessel_offset(self, offset):
         self.vessel_sensor.offset = offset
@@ -85,10 +74,8 @@ class BrewController:
         
         self.cleanup_fn = cleanup
     
-    async def update(self):
+    async def update(self, vessel_temp, room_temp):
         is_heater_on = self.is_heater_on()
-        vessel_temp = self.get_vessel_temp()
-        room_temp = self.get_room_temp()
 
         with open('temp-history.csv', 'a') as f:
             f.write(f'{self.target_temp},{self.temp_threshold},{is_heater_on},{vessel_temp},{room_temp}\n')
@@ -109,3 +96,6 @@ class BrewController:
                 await self.heater_plug.async_turn_on(channel=0)
         else:
             print('  No action.')
+        
+        self.last_vessel_temp = vessel_temp
+        self.last_room_temp = room_temp
