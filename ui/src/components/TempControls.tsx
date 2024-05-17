@@ -23,8 +23,7 @@ export type TargetType = {
     vessel_temp_offset: number,
 }
 
-const host = 'http://192.168.0.23:5000';
-// const host = 'http://192.168.0.32:5000';
+const host = `http://${process.env.REACT_APP_API_HOST}:5000`;
 const statusEndpoint = host + '/status';
 const targetEndpoint = host + '/target';
 

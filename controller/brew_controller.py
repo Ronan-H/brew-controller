@@ -3,8 +3,6 @@ import config
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 
-from temp_sensor import MockTempSensor, RealTempSensor
-
 import mocks
 
 INITIAL_LAST_READING = 18
@@ -17,11 +15,6 @@ class BrewController:
 
         self.last_vessel_temp = INITIAL_LAST_READING
         self.last_room_temp = INITIAL_LAST_READING
-
-        # self.vessel_sensor = MockTempSensor(vessel_offset, target_temp - 2, 0.25)
-        # self.room_sensor = MockTempSensor(0, target_temp - 3, 0)
-        # self.vessel_sensor = RealTempSensor(vessel_offset, '28-b5fa691f64ff') # no tape
-        # self.room_sensor = RealTempSensor(0, '28-2acb691f64ff') # red tape
         
         self.heater_plug = None
         self.cleanup_fn = None
