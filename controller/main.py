@@ -1,10 +1,13 @@
 import asyncio
 import os
 import serial
-from quart import Quart, jsonify, request
+from quart import Quart, jsonify, request, Response
 from quart_cors import cors
 
 from brew_controller import BrewController
+
+import mocks
+import random
 
 # Run command: python main.py
 
@@ -62,7 +65,7 @@ def init_app():
 
         brew_controller.write_settings_to_file(SERIALIZED_BC_PATH)
 
-        return await status()
+        return Response(status=200)
 
 init_app()
 
@@ -70,22 +73,27 @@ MIN_VALID_TEMP = 1
 MAX_VALID_TEMP = 80
 
 async def run_controller_loop():
-    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-    ser.reset_input_buffer()
+    if mocks.enabled:
+        while True:
+            await brew_controller.update(19 + random.random() * 4, 17 + random.random() * 2)
+            await asyncio.sleep(1)
+    else:
+        ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+        ser.reset_input_buffer()
 
-    while True:
-        if ser.in_waiting > 0:
-            line = ser.readline().decode('utf-8').rstrip()
-            temps = [float(t) for t in line.split(',')]
+        while True:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8').rstrip()
+                temps = [float(t) for t in line.split(',')]
 
-            if len(temps) == 2 and \
-              temps[0] > MIN_VALID_TEMP and temps[0] < MAX_VALID_TEMP and \
-              temps[1] > MIN_VALID_TEMP and temps[1] < MAX_VALID_TEMP:
-                await brew_controller.update(*temps)
-            else:
-                print(f'Invalid temps: ${temps}, skipping this reading')
-        
-        await asyncio.sleep(1)
+                if len(temps) == 2 and \
+                temps[0] > MIN_VALID_TEMP and temps[0] < MAX_VALID_TEMP and \
+                temps[1] > MIN_VALID_TEMP and temps[1] < MAX_VALID_TEMP:
+                    await brew_controller.update(*temps)
+                else:
+                    print(f'Invalid temps: ${temps}, skipping this reading')
+            
+            await asyncio.sleep(1)
 
 
 async def run_app_async():

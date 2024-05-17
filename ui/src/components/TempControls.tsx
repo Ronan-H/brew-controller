@@ -38,7 +38,7 @@ export default function TempControls() {
             fetch(statusEndpoint).then((res) =>
                 res.json(),
             ),
-            refetchInterval: 10000
+            refetchInterval: 2000
     });
 
     const getTarget = useQuery({
@@ -60,7 +60,7 @@ export default function TempControls() {
             });
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['tempStatus']});
+            queryClient.invalidateQueries({queryKey: ['tempTarget']});
 
             toast({
                 title: 'Target updated successfully',
@@ -118,9 +118,9 @@ export default function TempControls() {
 
             <Divider />
 
-            {!(getStatus.isPending || getTarget.isPending || putTarget.isPending) ? <>
+            {!(getTarget.isPending || putTarget.isPending) ? <>
                 <TempTargetForm
-                    key={`temp-target-form-${getStatus.dataUpdatedAt}`}
+                    key={`temp-target-form-${getTarget.dataUpdatedAt}`}
                     targetData={getTarget.data}
                     onSubmit={onSubmit}
                 />

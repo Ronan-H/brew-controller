@@ -5,6 +5,8 @@ from meross_iot.manager import MerossManager
 
 from temp_sensor import MockTempSensor, RealTempSensor
 
+import mocks
+
 INITIAL_LAST_READING = 18
 
 class BrewController:
@@ -38,41 +40,34 @@ class BrewController:
         return self.heater_plug.is_on()
     
     def set_vessel_offset(self, offset):
-        self.vessel_sensor.offset = offset
+        self.vessel_offset = offset
 
     async def init_meross_plug(self):
-        # Asia-Pacific: "iotx-ap.meross.com"
-        # Europe: "iotx-eu.meross.com"
-        # US: "iotx-us.meross.com"
-        http_api_client = await MerossHttpClient.async_from_user_password(api_base_url='https://iotx-eu.meross.com',
-                                                                        email=config.MEROSS_EMAIL, 
-                                                                        password=config.MEROSS_PASSWORD)
-
-        # Setup and start the device manager
-        manager = MerossManager(http_client=http_api_client)
-        await manager.async_init()
-
-        # Retrieve all the mss210n devices that are registered on this account
-        await manager.async_device_discovery()
-        plugs = manager.find_devices(device_type="mss210n")
-
-        if len(plugs) < 1:
-            raise Exception('No mss210n plugs found...')
+        if mocks.enabled:
+            self.heater_plug = mocks.MockMerossDevice()
         else:
-            # Turn it on channel 0
-            dev = plugs[0]
+            http_api_client = await MerossHttpClient.async_from_user_password(api_base_url='https://iotx-eu.meross.com',
+                                                                            email=config.MEROSS_EMAIL, 
+                                                                            password=config.MEROSS_PASSWORD)
 
-            # The first time we play with a device, we must update its status
-            await dev.async_update()
+            # Setup and start the device manager
+            manager = MerossManager(http_client=http_api_client)
+            await manager.async_init()
 
-            self.heater_plug = dev
+            # Retrieve all the mss210n devices that are registered on this account
+            await manager.async_device_discovery()
+            plugs = manager.find_devices(device_type="mss210n")
 
-        async def cleanup():
-            print('Closing Meross client...')
-            manager.close()
-            await http_api_client.async_logout()
-        
-        self.cleanup_fn = cleanup
+            if len(plugs) < 1:
+                raise Exception('No mss210n plugs found...')
+            else:
+                # Turn it on channel 0
+                dev = plugs[0]
+
+                # The first time we play with a device, we must update its status
+                await dev.async_update()
+
+                self.heater_plug = dev
     
     async def update(self, vessel_temp, room_temp):
         is_heater_on = self.is_heater_on()
@@ -85,6 +80,8 @@ class BrewController:
 
         print('Current vessel temp:', vessel_temp, flush=True)
         print('  Heater is on? - ', is_heater_on)
+        print('  Min acceptable temp: ', min_temp)
+        print('  Max acceptable temp: ', max_temp)
 
         if vessel_temp > max_temp:
             if is_heater_on:
