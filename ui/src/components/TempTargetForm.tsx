@@ -10,11 +10,11 @@ import {
 } from "@chakra-ui/react";
 import { LabelledField } from "./LabelledField";
 import { Controller, useForm } from "react-hook-form";
-import { PutTargetPayloadType } from "./TempControls";
+import { TargetType } from "./TempControls";
 
 type TempTargetFormProps = {
-    targetData: PutTargetPayloadType,
-    onSubmit: (data: PutTargetPayloadType) => void,
+    targetData: TargetType,
+    onSubmit: (data: TargetType) => void,
 };
 
 export default function TempTargetForm(props: TempTargetFormProps) {
@@ -22,7 +22,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
         handleSubmit,
         formState: { isDirty },
         control,
-      } = useForm<PutTargetPayloadType>({
+      } = useForm<TargetType>({
         defaultValues: props.targetData,
       });
 

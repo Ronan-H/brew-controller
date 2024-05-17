@@ -11,16 +11,13 @@ import { Spinner } from '@chakra-ui/react'
 import { SubmitHandler } from "react-hook-form";
 import TempTargetForm from "./TempTargetForm";
 
-export type GetStatusResponseType = {
+export type StatusType = {
     heater_on: boolean,
-    room_temp: number,
-    target_vessel_temp: number,
     vessel_temp: number,
-    vessel_temp_threshold: number,
-    vessel_temp_offset: number,
+    room_temp: number,
 };
 
-export type PutTargetPayloadType = {
+export type TargetType = {
     target_vessel_temp: number,
     vessel_temp_threshold: number,
     vessel_temp_offset: number,
@@ -37,15 +34,23 @@ export default function TempControls() {
 
     const getStatus = useQuery({
         queryKey: ['tempStatus'],
-        queryFn: (): Promise<GetStatusResponseType> =>
+        queryFn: (): Promise<StatusType> =>
             fetch(statusEndpoint).then((res) =>
                 res.json(),
             ),
-            // refetchInterval: 3000
+            refetchInterval: 10000
+    });
+
+    const getTarget = useQuery({
+        queryKey: ['tempTarget'],
+        queryFn: (): Promise<TargetType> =>
+            fetch(targetEndpoint).then((res) =>
+                res.json(),
+            ),
     });
 
     const putTarget = useMutation({
-        mutationFn: (targetData: PutTargetPayloadType) => {
+        mutationFn: (targetData: TargetType) => {
             return fetch(targetEndpoint, {
                 method: 'PUT',
                 body: JSON.stringify(targetData),
@@ -68,9 +73,9 @@ export default function TempControls() {
         },
     });
 
-    const onSubmit: SubmitHandler<PutTargetPayloadType> = (data) => putTarget.mutate(data);
+    const onSubmit: SubmitHandler<TargetType> = (data) => putTarget.mutate(data);
     
-    if (getStatus.error || putTarget.error) {
+    if (getStatus.error || getTarget.error || putTarget.error) {
         return <p>Error: {String(getStatus.error || putTarget.error)}</p>;
     }
 
@@ -85,17 +90,17 @@ export default function TempControls() {
 
             <Divider />
 
-            {!getStatus.isPending ? <>
+            {!getStatus.isPending && !getTarget.isPending ? <>
                 <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
                     <LabelledBadge
                         label='Vessel'
                         badgeText={`${getStatus.data.vessel_temp.toFixed(2)}°C`}
-                        colorScheme={Math.abs(getStatus.data?.vessel_temp - getStatus.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
+                        colorScheme={Math.abs(getStatus.data?.vessel_temp - getTarget.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Room'
                         badgeText={`${getStatus.data.room_temp.toFixed(2)}°C`}
-                        colorScheme={getStatus.data?.room_temp < getStatus.data?.target_vessel_temp ? 'green' : 'red'}
+                        colorScheme={getStatus.data?.room_temp < getTarget.data?.target_vessel_temp ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Heater'
@@ -113,10 +118,10 @@ export default function TempControls() {
 
             <Divider />
 
-            {!(getStatus.isPending || putTarget.isPending) ? <>
+            {!(getStatus.isPending || getTarget.isPending || putTarget.isPending) ? <>
                 <TempTargetForm
                     key={`temp-target-form-${getStatus.dataUpdatedAt}`}
-                    targetData={getStatus.data}
+                    targetData={getTarget.data}
                     onSubmit={onSubmit}
                 />
             </> : <Spinner size='lg' color='blue.500' thickness='4px' />}

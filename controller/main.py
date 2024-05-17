@@ -37,13 +37,18 @@ def init_app():
             heater_on=brew_controller.is_heater_on(),
             vessel_temp=brew_controller.last_vessel_temp,
             room_temp=brew_controller.last_room_temp,
+        )
+
+    @app.route("/target", methods=["GET"])
+    async def get_target():
+        return jsonify(
             target_vessel_temp=brew_controller.target_temp,
             vessel_temp_threshold=brew_controller.temp_threshold,
             vessel_temp_offset=brew_controller.vessel_offset
         )
 
     @app.route("/target", methods=["PUT"])
-    async def target():
+    async def put_target():
         request_json = await request.json
 
         if 'target_vessel_temp' in request_json:
