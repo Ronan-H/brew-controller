@@ -9,6 +9,8 @@ from brew_controller import BrewController
 import mocks
 import random
 
+from temp_correction import get_corrected_values
+
 # Run command: python main.py
 
 app = Quart(__name__)
@@ -89,7 +91,8 @@ async def run_controller_loop():
                 if len(temps) == 2 and \
                 temps[0] > MIN_VALID_TEMP and temps[0] < MAX_VALID_TEMP and \
                 temps[1] > MIN_VALID_TEMP and temps[1] < MAX_VALID_TEMP:
-                    await brew_controller.update(*temps)
+                    corrected_values = get_corrected_values(temps)
+                    await brew_controller.update(*corrected_values)
                 else:
                     print(f'Invalid temps: ${temps}, skipping this reading')
             
