@@ -9,11 +9,13 @@ sensor_values = [
         'raw_high': 99.87,
         'raw_low': 0.37,
         'raw_range': 99.5,
+        'second_adjust': -0.02
     },
     {
         'raw_high': 100,
         'raw_low': 0.12,
         'raw_range': 99.88,
+        'second_adjust': 0.02
     }
 ]
 
@@ -34,7 +36,7 @@ if __name__ == '__main__':
                 raw_high = values['raw_high']
                 raw_low = values['raw_low']
                 raw_range = values['raw_range']
-                corrected_value = (((raw_value - raw_low) * ref_range) / raw_range) + ref_low
+                corrected_value = (((raw_value - raw_low) * ref_range) / raw_range) + ref_low + values['second_adjust']
 
                 corrected.append(corrected_value)
             
