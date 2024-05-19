@@ -92,6 +92,11 @@ async def run_controller_loop():
                 temps[0] > MIN_VALID_TEMP and temps[0] < MAX_VALID_TEMP and \
                 temps[1] > MIN_VALID_TEMP and temps[1] < MAX_VALID_TEMP:
                     corrected_values = get_corrected_values(temps)
+
+                    # Swap sensor values because I taped the wrong one to the vessel
+                    # TODO: Swap back, or fix any references to which sensor is which
+                    corrected_values = corrected_values[::-1]
+
                     await brew_controller.update(*corrected_values)
                 else:
                     print(f'Invalid temps: ${temps}, skipping this reading')
