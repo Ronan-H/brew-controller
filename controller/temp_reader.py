@@ -25,7 +25,7 @@ if __name__ == '__main__':
             line = ser.readline().decode('utf-8').rstrip()
             raw_temps = [float(s) for s in line.split(',')]
 
-            print(f'Serial reading: {line}\n')
+            corrected = []
 
             for i in range(2):
                 raw_value = raw_temps[i]
@@ -36,7 +36,7 @@ if __name__ == '__main__':
                 raw_range = values['raw_range']
                 corrected_value = (((raw_value - raw_low) * ref_range) / raw_range) + ref_low
 
-                print(f'Sensor {i}:')
-                print(f'\tRaw value:  {raw_value}')
-                print(f'\tCorrected: {corrected_value}\n\n')
-                print('-' * 20 + '\n')
+                corrected.append(corrected_value)
+            
+            print(','.join(str(f'{f:.2f}') for f in (raw_temps + corrected)))
+
