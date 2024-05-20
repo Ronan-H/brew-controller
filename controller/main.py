@@ -9,7 +9,7 @@ from brew_controller import BrewController
 import mocks
 import random
 
-from temp_correction import get_corrected_values
+from temp_correction import get_corrected_values, TempSmoother
 
 # Run command: python main.py
 
@@ -75,6 +75,8 @@ MIN_VALID_TEMP = 1
 MAX_VALID_TEMP = 80
 
 async def run_controller_loop():
+    temp_smoothers = [TempSmoother(2, 2) for _ in range(2)]
+
     if mocks.enabled:
         while True:
             await brew_controller.update(19 + random.random() * 4, 17 + random.random() * 2)
@@ -97,7 +99,10 @@ async def run_controller_loop():
                     # TODO: Swap back, or fix any references to which sensor is which
                     corrected_values = corrected_values[::-1]
 
-                    await brew_controller.update(*corrected_values)
+                    # Smooth sensor readings, to reduce random variance between readings
+                    smoothed_values = [temp_smoothers[i].get_next(corrected_values[i]) for i in range(2)]
+
+                    await brew_controller.update(*smoothed_values)
                 else:
                     print(f'Invalid temps: ${temps}, skipping this reading')
             
