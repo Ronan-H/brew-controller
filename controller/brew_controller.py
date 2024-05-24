@@ -79,11 +79,18 @@ class BrewController:
         if vessel_temp > max_temp:
             if is_heater_on:
                 print('  Turning heater off')
-                await self.heater_plug.async_turn_off(channel=0)
+                try:
+                    await self.heater_plug.async_turn_off(channel=0)
+                except:
+                    self.error_message = 'Failed to turn heater off. Continuing...'
         elif vessel_temp < min_temp:
             if not is_heater_on:
                 print('  Turning heater on')
-                await self.heater_plug.async_turn_on(channel=0)
+                try:
+                    await self.heater_plug.async_turn_on(channel=0)
+                except:
+                    self.error_message = 'Failed to turn heater on. Continuing...'
+                
         else:
             print('  No action.')
         

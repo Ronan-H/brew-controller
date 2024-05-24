@@ -4,6 +4,12 @@ import {
     Heading,
     Divider,
     useToast,
+    Alert,
+    AlertDescription,
+    AlertIcon,
+    AlertTitle,
+    Box,
+    CloseButton,
 } from "@chakra-ui/react";
 import { LabelledBadge } from "./LabelledBadge";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,9 +29,14 @@ export type TargetType = {
     vessel_temp_offset: number,
 }
 
+export type ErrorType = {
+    message: string | null,
+}
+
 const host = `http://${process.env.REACT_APP_API_HOST}:5000`;
 const statusEndpoint = host + '/status';
 const targetEndpoint = host + '/target';
+const errorEndpoint = host + '/error';
 
 export default function TempControls() {
     const queryClient = useQueryClient();
@@ -72,6 +83,33 @@ export default function TempControls() {
         },
     });
 
+    const getError = useQuery({
+        queryKey: ['tempError'],
+        queryFn: (): Promise<ErrorType> =>
+            fetch(errorEndpoint).then((res) =>
+                res.json(),
+            ),
+            refetchInterval: 2000
+    });
+
+    const deleteError = useMutation({
+        mutationFn: () => {
+            return fetch(errorEndpoint, { method: 'DELETE' });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['tempError']});
+
+            toast({
+                title: 'Error message cleared.',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+                colorScheme: 'blue',
+                position: 'bottom',
+            })
+        },
+    });
+
     const onSubmit: SubmitHandler<TargetType> = (data) => putTarget.mutate(data);
     
     if (getStatus.error || getTarget.error || putTarget.error) {
@@ -88,6 +126,25 @@ export default function TempControls() {
             </Heading>
 
             <Divider />
+
+            {(!getError.error && !getError.isPending && getError.data?.message) && (
+                <Alert status='error' w={''}>
+                    <AlertIcon />
+                    <Box>
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>
+                            {getError.data?.message}
+                        </AlertDescription>
+                    </Box>
+                    <CloseButton
+                        alignSelf='flex-start'
+                        position='relative'
+                        right={-1}
+                        top={-1}
+                        onClick={() => deleteError.mutate()}
+                    />
+                </Alert>
+            )}
 
             {!getStatus.isPending && !getTarget.isPending ? <>
                 <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
