@@ -1,13 +1,19 @@
-import { Badge } from "@chakra-ui/react";
+import { Badge, Spinner } from "@chakra-ui/react";
 import { LabelledField } from "./LabelledField";
 
 type LabelledBadgeProps = {
     label: JSX.Element | string,
-    badgeText: string,
+    badgeContent?: JSX.Element | string,
     colorScheme?: string,
 }
 
 export function LabelledBadge(props: LabelledBadgeProps) {
+    const extraProps = props.badgeContent ? {} : {
+        // Expand empty badge to the size of the biggest badge when the status is loaded
+        w: '97.82px',
+        h: '36px',
+    };
+
     const badge = (
         <Badge
             variant='outline'
@@ -17,8 +23,9 @@ export function LabelledBadge(props: LabelledBadgeProps) {
             pr='6px'
             width={'100%'}
             textAlign={'center'}
+            {...extraProps}
         >
-            {props.badgeText}
+            {props.badgeContent || ''}
         </Badge>
     );
 

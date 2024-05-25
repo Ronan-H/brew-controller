@@ -12,10 +12,10 @@ import {
     CloseButton,
 } from "@chakra-ui/react";
 import { LabelledBadge } from "./LabelledBadge";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Spinner } from '@chakra-ui/react'
+import { UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SubmitHandler } from "react-hook-form";
-import TempTargetForm from "./TempTargetForm";
+import TempTargetForm, { TempTargetFormPlaceholder } from "./TempTargetForm";
+import { SpinnerHeading } from "./SpinnerHeading";
 
 export type StatusType = {
     heater_on: boolean,
@@ -116,14 +116,22 @@ export default function TempControls() {
         return <p>Error: {String(getStatus.error || putTarget.error)}</p>;
     }
 
+    const isQueryLoading = (query: UseQueryResult) => {
+        return query.isLoading || query.isPending || query.isRefetching;
+        // return true;
+    }
+
+    const isStatusLoading = isQueryLoading(getStatus);
+    const isSettingsLoading = isQueryLoading(getTarget) || putTarget.isPending;
+
     return (
         <VStack spacing='5' m='5'>
             <Heading as='h2'>Brew Controller</Heading>
             <Divider />
             
-            <Heading as='h3' size='lg'>
+            <SpinnerHeading includeSpinner={isStatusLoading}>
                 Status
-            </Heading>
+            </SpinnerHeading>
 
             <Divider />
 
@@ -150,37 +158,48 @@ export default function TempControls() {
                 <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
                     <LabelledBadge
                         label='Vessel'
-                        badgeText={`${getStatus.data.vessel_temp.toFixed(2)}°C`}
+                        badgeContent={`${getStatus.data.vessel_temp.toFixed(2)}°C`}
                         colorScheme={Math.abs(getStatus.data?.vessel_temp - getTarget.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Room'
-                        badgeText={`${getStatus.data.room_temp.toFixed(2)}°C`}
+                        badgeContent={`${getStatus.data.room_temp.toFixed(2)}°C`}
                         colorScheme={getStatus.data?.room_temp < getTarget.data?.target_vessel_temp ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Heater'
-                        badgeText={getStatus.data.heater_on ? 'ON' : 'OFF'}
+                        badgeContent={getStatus.data.heater_on ? 'ON' : 'OFF'}
                         colorScheme={getStatus.data.heater_on ? 'cyan' : 'gray'}
                     />
                 </SimpleGrid>
-            </> : <Spinner size='lg' color='blue.500' thickness='4px' />}
+            </> : <StatusContentPlaceholder />}
 
             <Divider />
 
-            <Heading as='h3' size='lg'>
+            <SpinnerHeading includeSpinner={isSettingsLoading}>
                 Settings
-            </Heading>
+            </SpinnerHeading>
 
             <Divider />
 
-            {!(getTarget.isPending || putTarget.isPending) ? <>
+            {!getTarget.isPending ? <>
                 <TempTargetForm
                     key={`temp-target-form-${getTarget.dataUpdatedAt}`}
                     targetData={getTarget.data}
+                    isSubmissionPending={putTarget.isPending}
                     onSubmit={onSubmit}
                 />
-            </> : <Spinner size='lg' color='blue.500' thickness='4px' />}
+            </> : <TempTargetFormPlaceholder />}
         </VStack>
+    );
+}
+
+function StatusContentPlaceholder() {
+    return (
+        <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
+            <LabelledBadge label='Vessel' />
+            <LabelledBadge label='Room' />
+            <LabelledBadge label='Heater' />
+        </SimpleGrid>
     );
 }
