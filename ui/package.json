@@ -18,10 +18,9 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start-prod": "npx http-server -b -g -p 3000 -d -c -1 false build/",
-    "build": "react-scripts build",
-    "compress-build": "gzipper compress --verbose --gzip --brotli ./build",
+    "start": "npx http-server -b -g -p 3000 -d -c -1 false build/",
+    "start-dev": "react-scripts start",
+    "build": "react-scripts build && gzipper compress --verbose --gzip --brotli ./build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
