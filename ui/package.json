@@ -21,6 +21,7 @@
     "start": "react-scripts start",
     "start-prod": "npx http-server -b -g -p 3000 -d -c -1 false build/",
     "build": "react-scripts build",
+    "compress-build": "gzipper compress --verbose --gzip --brotli ./build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
