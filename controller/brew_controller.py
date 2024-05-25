@@ -17,7 +17,7 @@ class BrewController:
         self.last_room_temp = INITIAL_LAST_READING
         
         self.heater_plug = None
-        self.cleanup_fn = None
+        self.error_message = None
     
     @staticmethod
     def init_from_file(file_path):
