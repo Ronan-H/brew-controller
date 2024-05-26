@@ -118,7 +118,6 @@ export default function TempControls() {
 
     const isQueryLoading = (query: UseQueryResult) => {
         return query.isLoading || query.isPending || query.isRefetching;
-        // return true;
     }
 
     const isStatusLoading = isQueryLoading(getStatus);

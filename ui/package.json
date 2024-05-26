@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run dev",
+    "start": "react-scripts start",
     "dev": "react-scripts start",
     "prod": "npx http-server -b -g -p 3000 -d false -c 31536000 build/",
     "build": "react-scripts build && gzipper compress --verbose --gzip --brotli ./build",
@@ -29,8 +29,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
   },
   "browserslist": {

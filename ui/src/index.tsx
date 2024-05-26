@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
 import {
   ChakraBaseProvider,
   extendBaseTheme,
@@ -10,6 +9,7 @@ import {
 import { QueryClient } from '@tanstack/react-query';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import TempControls from './components/TempControls';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,7 +42,7 @@ root.render(
   <React.StrictMode>
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <ChakraBaseProvider theme={theme}>
-        <App />
+        <TempControls />
       </ChakraBaseProvider>
     </PersistQueryClientProvider>
   </React.StrictMode>
