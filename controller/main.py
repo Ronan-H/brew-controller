@@ -107,7 +107,7 @@ async def run_controller_loop():
     if mocks.enabled:
         while True:
             await brew_controller.update(19 + random.random() * 4, 17 + random.random() * 2)
-            await asyncio.sleep(1)
+            await asyncio.sleep(10)
     else:
         ser = init_serial()
 
