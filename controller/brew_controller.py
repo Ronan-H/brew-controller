@@ -5,6 +5,8 @@ from meross_iot.manager import MerossManager
 
 import mocks
 
+import time
+
 INITIAL_LAST_READING = 18
 
 class BrewController:
@@ -18,6 +20,8 @@ class BrewController:
         
         self.heater_plug = None
         self.error_message = None
+
+        self.last_update_epoch = 0
     
     @staticmethod
     def init_from_file(file_path):
@@ -96,3 +100,5 @@ class BrewController:
         
         self.last_vessel_temp = vessel_temp
         self.last_room_temp = room_temp
+
+        self.last_update_epoch = time.time()

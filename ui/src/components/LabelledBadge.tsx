@@ -10,7 +10,7 @@ type LabelledBadgeProps = {
 export function LabelledBadge(props: LabelledBadgeProps) {
     const extraProps = props.badgeContent ? {} : {
         // Expand empty badge to the size of the biggest badge when the status is loaded
-        w: '97.82px',
+        w: '107.84px',
         h: '36px',
     };
 

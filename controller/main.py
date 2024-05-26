@@ -42,6 +42,7 @@ def init_app():
             heater_on=brew_controller.is_heater_on(),
             vessel_temp=brew_controller.last_vessel_temp,
             room_temp=brew_controller.last_room_temp,
+            last_update_epoch=brew_controller.last_update_epoch
         )
 
     @app.route("/target", methods=["GET"])

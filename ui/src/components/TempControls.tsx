@@ -21,6 +21,7 @@ export type StatusType = {
     heater_on: boolean,
     vessel_temp: number,
     room_temp: number,
+    last_update_epoch: number,
 };
 
 export type TargetType = {
@@ -48,7 +49,7 @@ export default function TempControls() {
             fetch(statusEndpoint).then((res) =>
                 res.json(),
             ),
-            refetchInterval: 2000
+        refetchInterval: 2000,
     });
 
     const getTarget = useQuery({
@@ -170,6 +171,14 @@ export default function TempControls() {
                         badgeContent={getStatus.data.heater_on ? 'ON' : 'OFF'}
                         colorScheme={getStatus.data.heater_on ? 'cyan' : 'gray'}
                     />
+                    <LabelledBadge
+                        label='Last Update'
+                        badgeContent={new Date(
+                            getStatus.data.last_update_epoch * 1000)
+                                .toLocaleTimeString('en-GB', { hourCycle: 'h23' })
+                        }
+                        colorScheme='gray'
+                    />
                 </SimpleGrid>
             </> : <StatusContentPlaceholder />}
 
@@ -199,6 +208,7 @@ function StatusContentPlaceholder() {
             <LabelledBadge label='Vessel' />
             <LabelledBadge label='Room' />
             <LabelledBadge label='Heater' />
+            <LabelledBadge label='Last Update' />
         </SimpleGrid>
     );
 }
