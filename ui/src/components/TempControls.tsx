@@ -169,7 +169,6 @@ export default function TempControls() {
                         badgeContent={getStatus.data.heater_on ? 'ON' : 'OFF'}
                         colorScheme={getStatus.data.heater_on ? 'blue' : 'gray'}
                     />
-                    <div /><div />
                     <LabelledBadge
                         label='Updated'
                         badgeContent={new Date(
@@ -211,7 +210,7 @@ function StatusContentPlaceholder() {
             <LabelledBadge label='Vessel' />
             <LabelledBadge label='Room' />
             <LabelledBadge label='Heater' />
-            <LabelledBadge label='Last Update' />
+            <LabelledBadge label='Updated' />
         </SimpleGrid>
     );
 }

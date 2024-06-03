@@ -38,9 +38,9 @@ def init_app():
     async def get_status():
         return jsonify(
             heater_on=brew_controller.is_heater_on(),
-            vessel_temp=brew_controller.last_vessel_temp,
-            room_temp=brew_controller.last_room_temp,
-            last_update_epoch=brew_controller.last_update_epoch
+            vessel_temp=round(brew_controller.last_vessel_temp, 3),
+            room_temp=round(brew_controller.last_room_temp, 3),
+            last_update_epoch=round(brew_controller.last_update_epoch, 3)
         )
 
     @app.route("/target", methods=["GET"])
