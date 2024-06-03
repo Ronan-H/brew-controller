@@ -32,7 +32,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
             <fieldset disabled={props.isSubmissionPending}>
                 <VStack spacing={8}>
                     <SimpleGrid spacingY='2' gridTemplateColumns='repeat(2, minmax(0, auto))'>
-                        <LabelledField label='Vessel Target (°C)' field={
+                        <LabelledField label='Target (°C)' field={
                             <Controller
                                 name={'target_vessel_temp'}
                                 control={control}
@@ -62,7 +62,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
 export function TempTargetFormPlaceholder() {
     return <VStack spacing={8}>
         <SimpleGrid spacingY='2' gridTemplateColumns='repeat(2, minmax(0, auto))'>
-            <LabelledField label='Vessel Target (°C)' field={
+            <LabelledField label='Target (°C)' field={
                 <NumberInput size='lg' w={'90px'}>
                     <NumberInputField/>
                     <NumberInputStepper>
