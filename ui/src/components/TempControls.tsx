@@ -26,8 +26,6 @@ export type StatusType = {
 
 export type TargetType = {
     target_vessel_temp: number,
-    vessel_temp_threshold: number,
-    vessel_temp_offset: number,
 }
 
 export type ErrorType = {

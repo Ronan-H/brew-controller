@@ -17,8 +17,6 @@ app = Quart(__name__)
 cors(app)
 
 INITIAL_TARGET_TEMP = 19
-INITIAL_THRESHOLD = 0.1
-INITIAL_VESSEL_OFFSET = 0.0
 SERIALIZED_BC_PATH = './controller-settings.dat'
 
 brew_controller = None
@@ -26,7 +24,7 @@ brew_controller = None
 try:
     brew_controller = BrewController.init_from_file(SERIALIZED_BC_PATH)
 except:
-    brew_controller = BrewController(INITIAL_TARGET_TEMP, INITIAL_THRESHOLD, INITIAL_VESSEL_OFFSET)
+    brew_controller = BrewController(INITIAL_TARGET_TEMP)
     brew_controller.write_settings_to_file(SERIALIZED_BC_PATH)
 
 
@@ -49,8 +47,6 @@ def init_app():
     async def get_target():
         return jsonify(
             target_vessel_temp=brew_controller.target_temp,
-            vessel_temp_threshold=brew_controller.temp_threshold,
-            vessel_temp_offset=brew_controller.vessel_offset
         )
 
     @app.route("/target", methods=["PUT"])
@@ -59,12 +55,6 @@ def init_app():
 
         if 'target_vessel_temp' in request_json:
             brew_controller.target_temp = float(request_json['target_vessel_temp'])
-
-        if 'vessel_temp_threshold' in request_json:
-            brew_controller.temp_threshold = float(request_json['vessel_temp_threshold'])
-
-        if 'vessel_temp_offset' in request_json:
-            brew_controller.set_vessel_offset(float(request_json['vessel_temp_offset']))
 
         brew_controller.write_settings_to_file(SERIALIZED_BC_PATH)
 

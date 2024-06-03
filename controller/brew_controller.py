@@ -10,10 +10,8 @@ import time
 INITIAL_LAST_READING = 18
 
 class BrewController:
-    def __init__(self, target_temp, temp_threshold, vessel_offset):
+    def __init__(self, target_temp):
         self.target_temp = target_temp
-        self.temp_threshold = temp_threshold
-        self.vessel_offset = vessel_offset
 
         self.last_vessel_temp = INITIAL_LAST_READING
         self.last_room_temp = INITIAL_LAST_READING
@@ -31,14 +29,11 @@ class BrewController:
         
     def write_settings_to_file(self, file_path):
         with open(file_path, 'w') as f:
-            f.write(f'{self.target_temp},{self.temp_threshold},{self.vessel_offset}\n')
+            f.write(f'{self.target_temp}\n')
 
     def is_heater_on(self):
         return self.heater_plug.is_on()
     
-    def set_vessel_offset(self, offset):
-        self.vessel_offset = offset
-
     async def init_meross_plug(self):
         if mocks.enabled:
             self.heater_plug = mocks.MockMerossDevice()
@@ -70,31 +65,26 @@ class BrewController:
         is_heater_on = self.is_heater_on()
 
         with open('temp-history.csv', 'a') as f:
-            f.write(f'{self.target_temp},{self.temp_threshold},{is_heater_on},{vessel_temp},{room_temp}\n')
-
-        max_temp = self.target_temp + self.temp_threshold
-        min_temp = self.target_temp - self.temp_threshold
+            f.write(f'{self.target_temp},{is_heater_on},{vessel_temp},{room_temp}\n')
 
         print('Current vessel temp:', vessel_temp, flush=True)
         print('  Heater is on? - ', is_heater_on)
-        print('  Min acceptable temp: ', min_temp)
-        print('  Max acceptable temp: ', max_temp)
+        print('  Target temp: ', self.target_temp)
 
-        if vessel_temp > max_temp:
+        if vessel_temp > self.target_temp:
             if is_heater_on:
                 print('  Turning heater off')
                 try:
                     await self.heater_plug.async_turn_off(channel=0)
                 except:
                     self.error_message = 'Failed to turn heater off. Continuing...'
-        elif vessel_temp < min_temp:
+        elif vessel_temp < self.target_temp:
             if not is_heater_on:
                 print('  Turning heater on')
                 try:
                     await self.heater_plug.async_turn_on(channel=0)
                 except:
                     self.error_message = 'Failed to turn heater on. Continuing...'
-                
         else:
             print('  No action.')
         
