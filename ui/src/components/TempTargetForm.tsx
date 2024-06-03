@@ -52,7 +52,7 @@ export default function TempTargetForm(props: TempTargetFormProps) {
                         } />
                     </SimpleGrid>
 
-                    <Button colorScheme='cyan' type='submit' isDisabled={!isDirty}>Submit</Button>
+                    <Button colorScheme='blue' type='submit' isDisabled={!isDirty}>Submit</Button>
                 </VStack>
             </fieldset>
         </form>

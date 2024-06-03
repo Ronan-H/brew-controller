@@ -17,7 +17,7 @@ export function LabelledBadge(props: LabelledBadgeProps) {
     const badge = (
         <Badge
             variant='outline'
-            colorScheme={props.colorScheme ?? 'cyan'}
+            colorScheme={props.colorScheme ?? 'blue'}
             fontSize="2xl"
             pl='6px'
             pr='6px'

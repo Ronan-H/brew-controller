@@ -156,26 +156,31 @@ export default function TempControls() {
                 <SimpleGrid spacingY='4' gridTemplateColumns='repeat(2, minmax(0, auto))'>
                     <LabelledBadge
                         label='Vessel'
-                        badgeContent={`${getStatus.data.vessel_temp.toFixed(2)}°C`}
+                        badgeContent={`${getStatus.data.vessel_temp.toFixed(1)}°C`}
                         colorScheme={Math.abs(getStatus.data?.vessel_temp - getTarget.data?.target_vessel_temp) < 0.5 ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Room'
-                        badgeContent={`${getStatus.data.room_temp.toFixed(2)}°C`}
+                        badgeContent={`${getStatus.data.room_temp.toFixed(1)}°C`}
                         colorScheme={getStatus.data?.room_temp < getTarget.data?.target_vessel_temp ? 'green' : 'red'}
                     />
                     <LabelledBadge
                         label='Heater'
                         badgeContent={getStatus.data.heater_on ? 'ON' : 'OFF'}
-                        colorScheme={getStatus.data.heater_on ? 'cyan' : 'gray'}
+                        colorScheme={getStatus.data.heater_on ? 'blue' : 'gray'}
                     />
+                    <div /><div />
                     <LabelledBadge
-                        label='Last Update'
+                        label='Updated'
                         badgeContent={new Date(
                             getStatus.data.last_update_epoch * 1000)
-                                .toLocaleTimeString('en-GB', { hourCycle: 'h23' })
+                                .toLocaleTimeString('en-GB', {
+                                    hourCycle: 'h23',
+                                    hour: '2-digit',
+                                    minute:'2-digit',
+                                })
                         }
-                        colorScheme='gray'
+                        colorScheme='blue'
                     />
                 </SimpleGrid>
             </> : <StatusContentPlaceholder />}
