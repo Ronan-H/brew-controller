@@ -7,20 +7,29 @@ type SpinnerHeadingProps = {
 };
 
 export function SpinnerHeading(props: SpinnerHeadingProps) {
-    const [isSpinnerVisible, setIsSpinnerVisible] = useState(false);
+    const [timestampSpinnerShown, setTimestampSpinnerShown] = useState(0);
+    const isSpinnerVisible = (timestampSpinnerShown > 0);
 
-    // Avoid showing the spinner for a really brief amount of time by adding a delay before showing it
+    // Avoid showing the spinner for a really brief amount of time
     useEffect(() => {
         if (props.includeSpinner) {
-            const timeout = setTimeout(() => {
-                setIsSpinnerVisible(true);
-            }, 100);
-    
-            return () => clearTimeout(timeout);
+            setTimestampSpinnerShown(Date.now());
         } else {
-            setIsSpinnerVisible(false);
+            const timeShown = Date.now() - timestampSpinnerShown;
+            const MIN_SHOW_TIME = 500;
+            const extraShowTime = MIN_SHOW_TIME - timeShown;
+
+            if (extraShowTime > 0) {
+                const timeout = setTimeout(() => {
+                    setTimestampSpinnerShown(0);
+                }, extraShowTime);
+            
+                return () => clearTimeout(timeout);
+            }
+            
+            setTimestampSpinnerShown(0);
         }
-    }, [props.includeSpinner]);
+    }, [props.includeSpinner, timestampSpinnerShown]);
 
     return (
         <Box

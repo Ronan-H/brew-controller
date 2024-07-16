@@ -1,4 +1,4 @@
-import { Badge, Spinner } from "@chakra-ui/react";
+import { Badge } from "@chakra-ui/react";
 import { LabelledField } from "./LabelledField";
 
 type LabelledBadgeProps = {
