@@ -32,10 +32,11 @@ export type ErrorType = {
     message: string | null,
 }
 
-const host = `http://${process.env.REACT_APP_API_HOST}:5000`;
-const statusEndpoint = host + '/status';
-const targetEndpoint = host + '/target';
-const errorEndpoint = host + '/error';
+const HOST = `http://${process.env.REACT_APP_API_HOST}:5000`;
+const STATUS_ENDPOINT = HOST + '/status';
+const TARGET_ENDPOINT = HOST + '/target';
+const ERROR_ENDPOINT = HOST + '/error';
+const UPDATE_STALE_THRESHOLD_MS = 60000;
 
 export default function TempControls() {
     const queryClient = useQueryClient();
@@ -44,7 +45,7 @@ export default function TempControls() {
     const getStatus = useQuery({
         queryKey: ['tempStatus'],
         queryFn: (): Promise<StatusType> =>
-            fetch(statusEndpoint).then((res) =>
+            fetch(STATUS_ENDPOINT).then((res) =>
                 res.json(),
             ),
         refetchInterval: 10000,
@@ -53,14 +54,14 @@ export default function TempControls() {
     const getTarget = useQuery({
         queryKey: ['tempTarget'],
         queryFn: (): Promise<TargetType> =>
-            fetch(targetEndpoint).then((res) =>
+            fetch(TARGET_ENDPOINT).then((res) =>
                 res.json(),
             ),
     });
 
     const putTarget = useMutation({
         mutationFn: (targetData: TargetType) => {
-            return fetch(targetEndpoint, {
+            return fetch(TARGET_ENDPOINT, {
                 method: 'PUT',
                 body: JSON.stringify(targetData),
                 headers: {
@@ -85,7 +86,7 @@ export default function TempControls() {
     const getError = useQuery({
         queryKey: ['tempError'],
         queryFn: (): Promise<ErrorType> =>
-            fetch(errorEndpoint).then((res) =>
+            fetch(ERROR_ENDPOINT).then((res) =>
                 res.json(),
             ),
             refetchInterval: 10000,
@@ -93,7 +94,7 @@ export default function TempControls() {
 
     const deleteError = useMutation({
         mutationFn: () => {
-            return fetch(errorEndpoint, { method: 'DELETE' });
+            return fetch(ERROR_ENDPOINT, { method: 'DELETE' });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['tempError']});
@@ -179,7 +180,9 @@ export default function TempControls() {
                                     minute:'2-digit',
                                 })
                         }
-                        colorScheme='blue'
+                        colorScheme={
+                            (Date.now() - getStatus.data.last_update_epoch * 1000 < UPDATE_STALE_THRESHOLD_MS) ? 'blue' : 'red'
+                        }
                     />
                 </SimpleGrid>
             </> : <StatusContentPlaceholder />}
