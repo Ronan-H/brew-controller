@@ -47,7 +47,7 @@ export default function TempControls() {
             fetch(statusEndpoint).then((res) =>
                 res.json(),
             ),
-        refetchInterval: 2000,
+        refetchInterval: 10000,
     });
 
     const getTarget = useQuery({
@@ -88,7 +88,7 @@ export default function TempControls() {
             fetch(errorEndpoint).then((res) =>
                 res.json(),
             ),
-            refetchInterval: 2000
+            refetchInterval: 10000,
     });
 
     const deleteError = useMutation({
