@@ -5,7 +5,7 @@
   "scripts": {
     "start": "react-scripts start",
     "dev": "react-scripts start",
-    "prod": "npx http-server -b -g -p 3000 -d false -c 31536000 build/",
+    "prod": "authbind --deep npx http-server -b -g -p 80 -d false -c 31536000 build/",
     "build": "react-scripts build && gzipper compress --verbose --gzip --brotli ./build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
