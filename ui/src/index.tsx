@@ -6,22 +6,10 @@ import {
   theme as chakraTheme,
   ThemeConfig,
 } from '@chakra-ui/react'
-import { QueryClient } from '@tanstack/react-query';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { QueryClient, QueryClientProvider  } from '@tanstack/react-query';
 import TempControls from './components/TempControls';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: Infinity,
-    },
-  },
-});
-
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-})
+const queryClient = new QueryClient();
 
 const { Button, Badge, Heading, Divider, NumberInput, Spinner, Alert } = chakraTheme.components;
 
@@ -40,10 +28,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <QueryClientProvider client={queryClient}>
       <ChakraBaseProvider theme={theme}>
         <TempControls />
       </ChakraBaseProvider>
-    </PersistQueryClientProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );
