@@ -11,7 +11,7 @@ import TempControls from './components/TempControls';
 
 const queryClient = new QueryClient();
 
-const { Button, Badge, Heading, Divider, NumberInput, Spinner, Alert } = chakraTheme.components;
+const { Button, Badge, Heading, Divider, NumberInput, Spinner, Alert, Modal } = chakraTheme.components;
 
 const theme: ThemeConfig = extendBaseTheme({
   config: {
@@ -19,7 +19,7 @@ const theme: ThemeConfig = extendBaseTheme({
     useSystemColorMode: false
   },
   components: {
-    Button, Badge, Heading, Divider, NumberInput, Spinner, Alert
+    Button, Badge, Heading, Divider, NumberInput, Spinner, Alert, Modal,
   }
 });
 
